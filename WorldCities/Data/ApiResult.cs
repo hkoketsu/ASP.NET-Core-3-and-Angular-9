@@ -170,7 +170,7 @@ namespace WorldCities.Data
         {
             get
             {
-                return ((PageIndex + 1) < TotalPages);
+                return ((PageIndex +1) < TotalPages);
             }
         }
 

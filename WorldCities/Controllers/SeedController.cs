@@ -21,7 +21,7 @@ namespace WorldCities.Controllers
         private readonly IWebHostEnvironment _env;
 
         public SeedController(
-            ApplicationDbContext context,
+            ApplicationDbContext context, 
             IWebHostEnvironment env)
         {
             _context = context;
@@ -31,51 +31,71 @@ namespace WorldCities.Controllers
         [HttpGet]
         public async Task<ActionResult> Import()
         {
-            var path = Path.Combine(_env.ContentRootPath, string.Format("Data/Source/worldcities.xlsx"));
-            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read))
+            var path = Path.Combine(
+                _env.ContentRootPath,
+                String.Format("Data/Source/worldcities.xlsx"));
+
+            using (var stream = new FileStream(
+                path, 
+                FileMode.Open, 
+                FileAccess.Read))
             {
                 using (var ep = new ExcelPackage(stream))
                 {
+                    // get the first worksheet
+                    
                     var ws = ep.Workbook.Worksheets[0];
 
+                    // initialize the record counters
                     var nCountries = 0;
                     var nCities = 0;
 
+                    #region Import all Countries
+                    // create a list containing all the countries already existing
+                    // into the Database (it will be empty on first run).
                     var lstCountries = _context.Countries.ToList();
-                    for (int nRow = 2; nRow <= ws.Dimension.End.Row; nRow++)
+
+                    // iterates through all rows, skipping the first one
+                    for (int nRow = 2;
+                        nRow <= ws.Dimension.End.Row;
+                        nRow++)
                     {
                         var row = ws.Cells[nRow, 1, nRow, ws.Dimension.End.Column];
-                        Console.WriteLine($"{nRow} - {row}");
                         var name = row[nRow, 5].GetValue<string>();
-                        
-                        // create the Country entity and fill it 
-                        // with xlsx data
-                        var country = new Country();
-                        country.Name = name;
-                        country.ISO2 = row[nRow, 6].GetValue<string>();
-                        country.ISO3 = row[nRow, 7].GetValue<string>();
 
-                        // save it into the Database
-                        _context.Countries.Add(country);
-                        await _context.SaveChangesAsync();
+                        // Did we already created a country with that name?
+                        if (lstCountries.Where(c => c.Name == name).Count() == 0)
+                        {
+                            // create the Country entity and fill it with xlsx data
+                            var country = new Country();
+                            country.Name = name;
+                            country.ISO2 = row[nRow, 6].GetValue<string>();
+                            country.ISO3 = row[nRow, 7].GetValue<string>();
 
-                        // store the country to retrieve 
-                        // its Id later on
-                        lstCountries.Add(country);
+                            // save it into the Database
+                            _context.Countries.Add(country);
+                            await _context.SaveChangesAsync();
 
-                        // increment the counter
-                        nCountries++;
+                            // store the country to retrieve its Id later on
+                            lstCountries.Add(country);
+
+                            // increment the counter
+                            nCountries++;
+                        }
                     }
 
-                    for (int nRow = 2; nRow <= ws.Dimension.End.Row; nRow++)
+                    #endregion
+
+                    #region Import all Cities
+                    // iterates through all rows, skipping the first one
+                    for (int nRow = 2;
+                        nRow <= ws.Dimension.End.Row;
+                        nRow++)
                     {
                         var row = ws.Cells[nRow, 1, nRow, ws.Dimension.End.Column];
-                        Console.WriteLine($"{nRow} - {row}");
 
-                        // create the City entity and fill it 
-                        // with xlsx data
+                        // create the City entity and fill it with xlsx data
                         var city = new City();
-
                         city.Name = row[nRow, 1].GetValue<string>();
                         city.Name_ASCII = row[nRow, 2].GetValue<string>();
                         city.Lat = row[nRow, 3].GetValue<decimal>();
@@ -83,7 +103,8 @@ namespace WorldCities.Controllers
 
                         // retrieve CountryId
                         var countryName = row[nRow, 5].GetValue<string>();
-                        var country = lstCountries.Where(c => c.Name == countryName).FirstOrDefault();
+                        var country = lstCountries.Where(c => c.Name == countryName)
+                            .FirstOrDefault();
                         city.CountryId = country.Id;
 
                         // save the city into the Database
@@ -93,9 +114,9 @@ namespace WorldCities.Controllers
                         // increment the counter
                         nCities++;
                     }
+                    #endregion
 
-                    return new JsonResult(new
-                    {
+                    return new JsonResult(new { 
                         Cities = nCities,
                         Countries = nCountries
                     });

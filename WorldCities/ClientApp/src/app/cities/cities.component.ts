@@ -1,16 +1,17 @@
-import { Component, OnInit, Inject, ViewChild } from '@angular/core';
+import { Component, Inject, ViewChild } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 
+import { City } from './city';
 
 @Component({
   selector: 'app-cities',
   templateUrl: './cities.component.html',
   styleUrls: ['./cities.component.css']
 })
-export class CitiesComponent implements OnInit {
+export class CitiesComponent {
   public displayedColumns: string[] = ['id', 'name', 'lat', 'lon'];
   public cities: MatTableDataSource<City>;
 
@@ -20,17 +21,17 @@ export class CitiesComponent implements OnInit {
   public defaultSortOrder: string = "asc";
 
   defaultFilterColumn: string = "name";
-  filterQuery: string = null;
+  filterQuery:string = null;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
 
   constructor(
     private http: HttpClient,
-    @Inject('BASE_URL') private baseUrl: string
-  ) { }
+    @Inject('BASE_URL') private baseUrl: string) {
+  }
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.loadData(null);
   }
 
@@ -39,7 +40,7 @@ export class CitiesComponent implements OnInit {
     pageEvent.pageIndex = this.defaultPageIndex;
     pageEvent.pageSize = this.defaultPageSize;
     if (query) {
-      this.filterQuery = query
+        this.filterQuery = query;
     }
     this.getData(pageEvent);
   }
@@ -49,13 +50,17 @@ export class CitiesComponent implements OnInit {
     var params = new HttpParams()
       .set("pageIndex", event.pageIndex.toString())
       .set("pageSize", event.pageSize.toString())
-      .set("sortColumn", this.sort ? this.sort.active : this.defaultSortColumn)
-      .set("sortOrder", this.sort ? this.sort.direction : this.defaultSortOrder);
+      .set("sortColumn", (this.sort)
+          ? this.sort.active
+          : this.defaultSortColumn)
+      .set("sortOrder", (this.sort)
+          ? this.sort.direction
+          : this.defaultSortOrder);
 
     if (this.filterQuery) {
       params = params
-        .set("filterColumn", this.defaultFilterColumn)
-        .set("filterQuery", this.filterQuery);
+          .set("filterColumn", this.defaultFilterColumn)
+          .set("filterQuery", this.filterQuery);
     }
 
     this.http.get<any>(url, { params })
@@ -66,11 +71,4 @@ export class CitiesComponent implements OnInit {
         this.cities = new MatTableDataSource<City>(result.data);
       }, error => console.error(error));
   }
-}
-
-export interface City {
-  id: number;
-  name: string;
-  lat: string;
-  lon: string
 }

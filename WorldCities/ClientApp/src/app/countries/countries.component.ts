@@ -1,16 +1,17 @@
-import { Component, Inject, ViewChild, OnInit } from '@angular/core';
+import { Component, Inject, ViewChild } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
+
+import { Country } from './country';
 
 @Component({
   selector: 'app-countries',
   templateUrl: './countries.component.html',
   styleUrls: ['./countries.component.css']
 })
-export class CountriesComponent implements OnInit {
-
+export class CountriesComponent {
   public displayedColumns: string[] = ['id', 'name', 'iso2', 'iso3'];
   public countries: MatTableDataSource<Country>;
 
@@ -39,7 +40,7 @@ export class CountriesComponent implements OnInit {
     pageEvent.pageIndex = this.defaultPageIndex;
     pageEvent.pageSize = this.defaultPageSize;
     if (query) {
-      this.filterQuery = query;
+        this.filterQuery = query;
     }
     this.getData(pageEvent);
   }
@@ -70,11 +71,4 @@ export class CountriesComponent implements OnInit {
         this.countries = new MatTableDataSource<Country>(result.data);
       }, error => console.error(error));
   }
-}
-
-export interface Country {
-  id: number;
-  name: string;
-  iso2: string;
-  iso3: string;
 }
