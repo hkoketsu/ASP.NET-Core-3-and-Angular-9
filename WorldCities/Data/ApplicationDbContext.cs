@@ -1,7 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using WorldCities.Data.Models;
-using IdentityServer4.EntityFramework.Options;
+﻿using IdentityServer4.EntityFramework.Options;
 using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using WorldCities.Data.Models;
 
 namespace WorldCities.Data
 {
@@ -10,14 +11,15 @@ namespace WorldCities.Data
         #region Constructor
         public ApplicationDbContext(
             DbContextOptions options,
-            IOptions<OperationalStoreOptions> operationalStoreOptions
-            ) : base(options, operationalStoreOptions)
+            IOptions<OperationalStoreOptions> operationalStoreOptions)
+            : base(options, operationalStoreOptions)
         {
         }
         #endregion Constructor
 
         #region Methods
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder
+         modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
