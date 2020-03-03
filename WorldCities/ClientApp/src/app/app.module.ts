@@ -43,7 +43,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
     BrowserAnimationsModule,
     AngularMaterialModule,
     ReactiveFormsModule
-  ],
+    ],
   providers: [],
   bootstrap: [AppComponent]
 })

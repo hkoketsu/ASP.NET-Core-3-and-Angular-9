@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Linq.Dynamic.Core;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace WorldCities.Data
 {
@@ -89,6 +90,14 @@ namespace WorldCities.Data
                 .Skip(pageIndex * pageSize)
                 .Take(pageSize);
 
+            // retrieve the SQL query (for debug purposes)
+            #if DEBUG
+            {
+                var sql = source.ToSql();
+                // do something with the sql string
+            }
+            #endif
+
             var data = await source.ToListAsync();
 
             return new ApiResult<T>(
@@ -128,7 +137,7 @@ namespace WorldCities.Data
 
         #region Properties
         /// <summary>
-        /// IQueryable data result to return.
+        /// The data result.
         /// </summary>
         public List<T> Data { get; private set; }
 

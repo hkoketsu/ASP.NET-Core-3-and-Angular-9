@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -26,16 +27,24 @@ namespace WorldCities.Controllers
         // GET: api/Countries/?pageIndex=0&pageSize=10&sortColumn=name&sortOrder=asc
         // GET: api/Countries/?pageIndex=0&pageSize=10&sortColumn=name&sortOrder=asc&filterColumn=name&filterQuery=york
         [HttpGet]
-        public async Task<ActionResult<ApiResult<Country>>> GetCountries(
-                int pageIndex = 0,
-                int pageSize = 10,
-                string sortColumn = null,
-                string sortOrder = null,
-                string filterColumn = null,
-                string filterQuery = null)
+        public async Task<ActionResult<ApiResult<CountryDTO>>> GetCountries(
+        int pageIndex = 0,
+        int pageSize = 10,
+        string sortColumn = null,
+        string sortOrder = null,
+        string filterColumn = null,
+        string filterQuery = null)
         {
-            return await ApiResult<Country>.CreateAsync(
-                    _context.Countries,
+            return await ApiResult<CountryDTO>.CreateAsync(
+                    _context.Countries
+                        .Select(c => new CountryDTO()
+                        {
+                            Id = c.Id,
+                            Name = c.Name,
+                            ISO2 = c.ISO2,
+                            ISO3 = c.ISO3,
+                            TotCities = c.Cities.Count
+                        }),
                     pageIndex,
                     pageSize,
                     sortColumn,
@@ -44,6 +53,58 @@ namespace WorldCities.Controllers
                     filterQuery);
         }
 
+        //public async Task<ActionResult<ApiResult<dynamic>>> GetCountries(
+        //    int pageIndex = 0,
+        //    int pageSize = 10,
+        //    string sortColumn = null,
+        //    string sortOrder = null,
+        //    string filterColumn = null,
+        //    string filterQuery = null)
+        //{
+        //    return await ApiResult<dynamic>.CreateAsync(
+        //            _context.Countries
+        //                .Select(c => new
+        //                {
+        //                    Id = c.Id,
+        //                    Name = c.Name,
+        //                    ISO2 = c.ISO2,
+        //                    ISO3 = c.ISO3,
+        //                    TotCities = c.Cities.Count
+        //                }),
+        //            pageIndex,
+        //            pageSize,
+        //            sortColumn,
+        //            sortOrder,
+        //            filterColumn,
+        //            filterQuery);
+        //}
+
+
+        //public async Task<ActionResult<ApiResult<Country>>> GetCountries(
+        //int pageIndex = 0,
+        //int pageSize = 10,
+        //string sortColumn = null,
+        //string sortOrder = null,
+        //string filterColumn = null,
+        //string filterQuery = null)
+        //{
+        //    return await ApiResult<Country>.CreateAsync(
+        //            _context.Countries
+        //                .Select(c => new Country()
+        //                {
+        //                    Id = c.Id,
+        //                    Name = c.Name,
+        //                    ISO2 = c.ISO2,
+        //                    ISO3 = c.ISO3,
+        //                    TotCities = c.Cities.Count
+        //                }),
+        //            pageIndex,
+        //            pageSize,
+        //            sortColumn,
+        //            sortOrder,
+        //            filterColumn,
+        //            filterQuery);
+        //}
 
         // GET: api/Countries/5
         [HttpGet("{id}")]
@@ -122,6 +183,38 @@ namespace WorldCities.Controllers
         private bool CountryExists(int id)
         {
             return _context.Countries.Any(e => e.Id == id);
+        }
+
+        [HttpPost]
+        [Route("IsDupeField")]
+        public bool IsDupeField(
+            int countryId, 
+            string fieldName, 
+            string fieldValue)
+        {
+            // Standard approach(using strongly-typed LAMBA expressions)
+            //switch (fieldName)
+            //{
+            //    case "name":
+            //        return _context.Countries.Any(
+            //            c => c.Name == fieldValue && c.Id != countryId);
+            //    case "iso2":
+            //        return _context.Countries.Any(
+            //            c => c.ISO2 == fieldValue && c.Id != countryId);
+            //    case "iso3":
+            //        return _context.Countries.Any(
+            //            c => c.ISO3 == fieldValue && c.Id != countryId);
+            //    default:
+            //        return false;
+            //}
+
+            // Dynamic approach (using System.Linq.Dynamic.Core)
+            return (ApiResult<Country>.IsValidProperty(fieldName, true))
+                ? _context.Countries.Any(
+                    String.Format("{0} == @0 && Id != @1", fieldName),
+                    fieldValue,
+                    countryId)
+                : false;
         }
     }
 }

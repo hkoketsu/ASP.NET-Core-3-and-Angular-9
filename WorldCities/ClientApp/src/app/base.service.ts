@@ -5,8 +5,8 @@ import { Observable } from 'rxjs';
 @Injectable()
 export abstract class BaseService {
     constructor(
-        protected http: HttpClient,
-        protected baseUrl: string
+        public http: HttpClient,
+        public baseUrl: string
     ) {
     }
 
