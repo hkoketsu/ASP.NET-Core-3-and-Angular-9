@@ -18,13 +18,19 @@ namespace WorldCities.Controllers
     public class SeedController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IWebHostEnvironment _env;
 
         public SeedController(
             ApplicationDbContext context, 
+            RoleManager<IdentityRole> roleManager,
+            UserManager<ApplicationUser> userManager,
             IWebHostEnvironment env)
         {
             _context = context;
+            _roleManager = roleManager;
+            _userManager = userManager;
             _env = env;
         }
 
@@ -122,6 +128,12 @@ namespace WorldCities.Controllers
                     });
                 }
             }
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> CreateDefaultUsers()
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using WorldCities.Controllers;
 using WorldCities.Data;
 using WorldCities.Data.Models;
+using IdentityServer4.EntityFramework.Options;
 using Xunit;
 
 namespace WorldCities.Tests
@@ -18,7 +19,8 @@ namespace WorldCities.Tests
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(databaseName: "WorldCities")
                 .Options;
-            using (var context = new ApplicationDbContext(options))
+            var storeOptions = Options.Create(new OperationalStoreOptions());
+            using (var context = new ApplicationDbContext(options, storeOptions))
             {
                 context.Add(new City()
                 {

@@ -147,5 +147,8 @@
       }
     }
   },
-  "defaultProject": "WorldCities"
+  "defaultProject": "WorldCities",
+  "cli": {
+    "analytics": "0f4d5903-df4c-4997-aeb9-73ccb6bdbdb2"
+  }
 }
